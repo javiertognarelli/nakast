@@ -7,10 +7,15 @@
 // by PubMLST; see docs/supported_species.md for the catalogue and
 // docs/USER_MANUAL.md for design rationale, assumptions and limitations.
 //
-// Author:          Javier Tognarelli - Genomica UV
-// Commissioned by: ISP (Daniel Escobar, Fernando Amaya)
-// Panel:           in-house design, ISP 2025
-// Created:         December 2025
+// Authors:
+//   Javier Tognarelli Santiago
+//     Genomica UV, Escuela de Medicina, Universidad de Valparaiso, Chile
+//   Daniel Escobar
+//     Unidad de Investigacion e Innovacion, Instituto de Salud Publica, Chile
+//   Fernando Amaya Inzunza
+//     Unidad de Investigacion e Innovacion, Instituto de Salud Publica, Chile
+//
+// Created: December 2025
 
 nextflow.enable.dsl=2
 

@@ -587,7 +587,13 @@ single amplicon, so they cannot cover an allele.
 <https://github.com/javiertognarelli/bio_pipelines/issues>. Include the Nextflow version
 (`nextflow -version`), the command you ran, and the relevant part of `.nextflow.log`.
 
-**Authorship.** NAKAST — Javier Tognarelli, Genómica UV.
+**Authorship.**
+
+NAKAST — Javier Tognarelli Santiago, Genómica UV, Escuela de Medicina,
+Universidad de Valparaíso, Chile\
+Daniel Escobar, Unidad de Investigación e Innovación, Instituto de Salud Pública, Chile\
+Fernando Amaya Inzunza, Unidad de Investigación e Innovación, Instituto de Salud Pública,
+Chile
 
 **Citing NAKAST.** Cite this pipeline together with PubMLST and the underlying tools. The
 complete list of third-party components and their licences is in

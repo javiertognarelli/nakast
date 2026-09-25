@@ -13,7 +13,11 @@ a per-sample parameter: it works with any of the **135 MLST schemes published by
 and a single run can mix species. See [`docs/supported_species.md`](docs/supported_species.md)
 for the full catalogue.
 
-For concepts, assumptions and limitations, read the [User Manual](docs/USER_MANUAL.md).
+For concepts, assumptions and limitations, read the **User Manual**, available in
+[English](docs/USER_MANUAL.md) and [Spanish](docs/MANUAL_USUARIO.md).
+
+Third-party components and their licences are inventoried in
+[`docs/THIRD_PARTY_LICENSES.md`](docs/THIRD_PARTY_LICENSES.md).
 
 ---
 

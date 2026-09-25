@@ -36,8 +36,8 @@ process declares its own pinned Conda environment and Nextflow builds them on fi
 ## Installation
 
 ```bash
-git clone https://github.com/javiertognarelli/bio_pipelines.git
-cd bio_pipelines/mlst_ont_pipeline
+git clone https://github.com/javiertognarelli/nakast.git
+cd nakast
 ```
 
 Check that the pipeline parses and that Conda is enabled:
@@ -173,7 +173,7 @@ reproducibility that the pinned environments provide.
 
 NAKAST — Javier Tognarelli Santiago, Genómica UV, Escuela de Medicina,
 Universidad de Valparaíso, Chile\
-Daniel Escobar, Unidad de Investigación e Innovación, Instituto de Salud Pública, Chile\
+Daniel Escobar Araya, Unidad de Investigación e Innovación, Instituto de Salud Pública, Chile\
 Fernando Amaya Inzunza, Unidad de Investigación e Innovación, Instituto de Salud Pública,
 Chile
 

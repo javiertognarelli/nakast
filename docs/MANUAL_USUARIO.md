@@ -615,14 +615,14 @@ cubrir un alelo.
 ## 18. Soporte, citación y licencia
 
 **Reportar problemas.** Abra un issue en
-<https://github.com/javiertognarelli/bio_pipelines/issues>. Incluya la versión de Nextflow
+<https://github.com/javiertognarelli/nakast/issues>. Incluya la versión de Nextflow
 (`nextflow -version`), el comando que ejecutó, y la parte relevante de `.nextflow.log`.
 
 **Autoría.**
 
 NAKAST — Javier Tognarelli Santiago, Genómica UV, Escuela de Medicina,
 Universidad de Valparaíso, Chile\
-Daniel Escobar, Unidad de Investigación e Innovación, Instituto de Salud Pública, Chile\
+Daniel Escobar Araya, Unidad de Investigación e Innovación, Instituto de Salud Pública, Chile\
 Fernando Amaya Inzunza, Unidad de Investigación e Innovación, Instituto de Salud Pública,
 Chile
 

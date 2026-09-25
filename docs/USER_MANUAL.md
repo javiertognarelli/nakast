@@ -584,14 +584,14 @@ single amplicon, so they cannot cover an allele.
 ## 18. Support, citation and licence
 
 **Reporting problems.** Open an issue at
-<https://github.com/javiertognarelli/bio_pipelines/issues>. Include the Nextflow version
+<https://github.com/javiertognarelli/nakast/issues>. Include the Nextflow version
 (`nextflow -version`), the command you ran, and the relevant part of `.nextflow.log`.
 
 **Authorship.**
 
 NAKAST — Javier Tognarelli Santiago, Genómica UV, Escuela de Medicina,
 Universidad de Valparaíso, Chile\
-Daniel Escobar, Unidad de Investigación e Innovación, Instituto de Salud Pública, Chile\
+Daniel Escobar Araya, Unidad de Investigación e Innovación, Instituto de Salud Pública, Chile\
 Fernando Amaya Inzunza, Unidad de Investigación e Innovación, Instituto de Salud Pública,
 Chile
 

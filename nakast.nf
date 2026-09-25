@@ -10,7 +10,7 @@
 // Authors:
 //   Javier Tognarelli Santiago
 //     Genomica UV, Escuela de Medicina, Universidad de Valparaiso, Chile
-//   Daniel Escobar
+//   Daniel Escobar Araya
 //     Unidad de Investigacion e Innovacion, Instituto de Salud Publica, Chile
 //   Fernando Amaya Inzunza
 //     Unidad de Investigacion e Innovacion, Instituto de Salud Publica, Chile

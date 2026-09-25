@@ -9,28 +9,31 @@ results, what the pipeline assumes about your data, and where its limits are.
 ## Contents
 
 **Getting started**
-1. [What NAKAST does](#1-what-nakast-does)
-2. [Background concepts](#2-background-concepts)
-3. [A complete worked example](#3-a-complete-worked-example)
+
+[1. What NAKAST does](#1-what-nakast-does)\
+[2. Background concepts](#2-background-concepts)\
+[3. A complete worked example](#3-a-complete-worked-example)
 
 **Using the pipeline**
-4. [Input specification](#4-input-specification)
-5. [Parameter reference](#5-parameter-reference)
-6. [Output reference](#6-output-reference)
-7. [Interpreting your results](#7-interpreting-your-results)
-8. [Assessing data quality](#8-assessing-data-quality)
+
+[4. Input specification](#4-input-specification)\
+[5. Parameter reference](#5-parameter-reference)\
+[6. Output reference](#6-output-reference)\
+[7. Interpreting your results](#7-interpreting-your-results)\
+[8. Assessing data quality](#8-assessing-data-quality)
 
 **Reference**
-9. [Workflow architecture](#9-workflow-architecture)
-10. [How allele calling works](#10-how-allele-calling-works)
-11. [ST and CC assignment](#11-st-and-cc-assignment)
-12. [Species support](#12-species-support)
-13. [Assumptions](#13-assumptions)
-14. [Limitations](#14-limitations)
-15. [Troubleshooting](#15-troubleshooting)
-16. [Reproducibility](#16-reproducibility)
-17. [Design notes](#17-design-notes)
-18. [Support, citation and licence](#18-support-citation-and-licence)
+
+[9. Workflow architecture](#9-workflow-architecture)\
+[10. How allele calling works](#10-how-allele-calling-works)\
+[11. ST and CC assignment](#11-st-and-cc-assignment)\
+[12. Species support](#12-species-support)\
+[13. Assumptions](#13-assumptions)\
+[14. Limitations](#14-limitations)\
+[15. Troubleshooting](#15-troubleshooting)\
+[16. Reproducibility](#16-reproducibility)\
+[17. Design notes](#17-design-notes)\
+[18. Support, citation and licence](#18-support-citation-and-licence)
 
 ---
 
@@ -345,7 +348,7 @@ which means nothing passed the thresholds.
 ## 8. Assessing data quality
 
 NAKAST does not enforce a quality gate beyond `--min_depth`. Use these reference points from
-validation on the in-house ISP *S. agalactiae* panel.
+validation on the in-house *S. agalactiae* amplicon panel.
 
 | Metric | Typical | Concerning |
 |---|---|---|
@@ -489,7 +492,7 @@ These matter for interpreting results.
 4. **Biologically validated on one species.** The architecture is species-agnostic and was
    exercised against the *Salmonella*, *Brucella*, *Vibrio* and *Mycoplasma genitalium*
    schemes, but validation against known isolates was done only for *S. agalactiae* with the
-   in-house ISP amplicon panel. Alignment parameters are tuned for that panel.
+   in-house amplicon panel. Alignment parameters are tuned for that panel.
 5. **Clonal complexes depend on the scheme.** 33 of 135 schemes define none, and even where
    defined many STs have no CC.
 6. **No contamination or mixed-sample detection.** There is no explicit check for multiple
@@ -584,8 +587,7 @@ single amplicon, so they cannot cover an allele.
 <https://github.com/javiertognarelli/bio_pipelines/issues>. Include the Nextflow version
 (`nextflow -version`), the command you ran, and the relevant part of `.nextflow.log`.
 
-**Authorship.** NAKAST — Javier Tognarelli, Genómica UV. Commissioned by ISP (Daniel Escobar,
-Fernando Amaya). Panel designed in-house, ISP 2025.
+**Authorship.** NAKAST — Javier Tognarelli, Genómica UV.
 
 **Citing NAKAST.** Cite this pipeline together with PubMLST and the underlying tools. The
 complete list of third-party components and their licences is in

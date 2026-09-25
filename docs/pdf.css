@@ -1,0 +1,40 @@
+/* Print stylesheet for the PDF builds of the manuals.
+   Applied by build_pdf.sh; has no effect on the Markdown rendered by GitHub. */
+
+@page {
+    margin: 2cm 2.2cm;
+    @bottom-center { content: counter(page); font-size: 9pt; color: #666; }
+}
+
+body {
+    font-size: 10.5pt;
+    line-height: 1.45;
+}
+
+/* Justify running text. Hyphenation keeps justification from opening large
+   gaps between words; it relies on the lang attribute set by pandoc. */
+p, li {
+    text-align: justify;
+    hyphens: auto;
+}
+
+/* Never justify things where ragged-right is correct. */
+h1, h2, h3, h4, th, td, pre, code, figcaption {
+    text-align: left;
+    hyphens: none;
+}
+
+/* Keep inline code on one line: justification would otherwise break flags such
+   as --min_depth at their own hyphen, which reads as two separate options. */
+p code, li code, td code {
+    white-space: nowrap;
+}
+
+h2 { margin-top: 1.6em; }
+
+table { font-size: 9.5pt; width: 100%; }
+th, td { padding: 3px 6px; }
+
+pre { font-size: 9pt; page-break-inside: avoid; }
+figure { page-break-inside: avoid; text-align: center; }
+figcaption { font-size: 9pt; color: #555; text-align: center; }

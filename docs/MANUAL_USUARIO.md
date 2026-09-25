@@ -11,28 +11,31 @@ asume el pipeline sobre sus datos, y dónde están sus límites.
 ## Contenidos
 
 **Primeros pasos**
-1. [Qué hace NAKAST](#1-qué-hace-nakast)
-2. [Conceptos previos](#2-conceptos-previos)
-3. [Un ejemplo completo](#3-un-ejemplo-completo)
+
+[1. Qué hace NAKAST](#1-qué-hace-nakast)\
+[2. Conceptos previos](#2-conceptos-previos)\
+[3. Un ejemplo completo](#3-un-ejemplo-completo)
 
 **Uso del pipeline**
-4. [Especificación de entrada](#4-especificación-de-entrada)
-5. [Referencia de parámetros](#5-referencia-de-parámetros)
-6. [Referencia de salidas](#6-referencia-de-salidas)
-7. [Cómo interpretar los resultados](#7-cómo-interpretar-los-resultados)
-8. [Evaluación de la calidad de los datos](#8-evaluación-de-la-calidad-de-los-datos)
+
+[4. Especificación de entrada](#4-especificación-de-entrada)\
+[5. Referencia de parámetros](#5-referencia-de-parámetros)\
+[6. Referencia de salidas](#6-referencia-de-salidas)\
+[7. Cómo interpretar los resultados](#7-cómo-interpretar-los-resultados)\
+[8. Evaluación de la calidad de los datos](#8-evaluación-de-la-calidad-de-los-datos)
 
 **Referencia**
-9. [Arquitectura del flujo](#9-arquitectura-del-flujo)
-10. [Cómo se llaman los alelos](#10-cómo-se-llaman-los-alelos)
-11. [Asignación de ST y CC](#11-asignación-de-st-y-cc)
-12. [Especies soportadas](#12-especies-soportadas)
-13. [Supuestos](#13-supuestos)
-14. [Limitaciones](#14-limitaciones)
-15. [Resolución de problemas](#15-resolución-de-problemas)
-16. [Reproducibilidad](#16-reproducibilidad)
-17. [Notas de diseño](#17-notas-de-diseño)
-18. [Soporte, citación y licencia](#18-soporte-citación-y-licencia)
+
+[9. Arquitectura del flujo](#9-arquitectura-del-flujo)\
+[10. Cómo se llaman los alelos](#10-cómo-se-llaman-los-alelos)\
+[11. Asignación de ST y CC](#11-asignación-de-st-y-cc)\
+[12. Especies soportadas](#12-especies-soportadas)\
+[13. Supuestos](#13-supuestos)\
+[14. Limitaciones](#14-limitaciones)\
+[15. Resolución de problemas](#15-resolución-de-problemas)\
+[16. Reproducibilidad](#16-reproducibilidad)\
+[17. Notas de diseño](#17-notas-de-diseño)\
+[18. Soporte, citación y licencia](#18-soporte-citación-y-licencia)
 
 ---
 
@@ -358,7 +361,7 @@ completo, lo que significa que nada pasó los umbrales.
 ## 8. Evaluación de la calidad de los datos
 
 NAKAST no impone un umbral de calidad más allá de `--min_depth`. Use estos puntos de
-referencia, obtenidos en la validación con el panel de amplicones propio del ISP para
+referencia, obtenidos en la validación con el panel de amplicones propio para
 *S. agalactiae*.
 
 | Métrica | Habitual | Preocupante |
@@ -514,7 +517,7 @@ Estos importan para interpretar los resultados.
 4. **Validado biológicamente en una sola especie.** La arquitectura es agnóstica de especie y
    se ejercitó contra los esquemas de *Salmonella*, *Brucella*, *Vibrio* y *Mycoplasma
    genitalium*, pero la validación contra aislados conocidos se hizo solo para
-   *S. agalactiae* con el panel de amplicones propio del ISP. Los parámetros de alineamiento
+   *S. agalactiae* con el panel de amplicones propio. Los parámetros de alineamiento
    están afinados para ese panel.
 5. **Los complejos clonales dependen del esquema.** 33 de 135 esquemas no definen ninguno, y
    aun donde existen, muchos STs no tienen CC.
@@ -615,8 +618,7 @@ cubrir un alelo.
 <https://github.com/javiertognarelli/bio_pipelines/issues>. Incluya la versión de Nextflow
 (`nextflow -version`), el comando que ejecutó, y la parte relevante de `.nextflow.log`.
 
-**Autoría.** NAKAST — Javier Tognarelli, Genómica UV. Encargo del ISP (Daniel Escobar,
-Fernando Amaya). Panel de diseño propio, ISP 2025.
+**Autoría.** NAKAST — Javier Tognarelli, Genómica UV.
 
 **Citar NAKAST.** Cite este pipeline junto con PubMLST y las herramientas subyacentes. La
 lista completa de componentes de terceros y sus licencias está en

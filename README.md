@@ -30,8 +30,8 @@ Third-party components and their licences are inventoried in
 | Component | Version | Notes |
 |---|---|---|
 | Nextflow | 25.10 or later | Tested on 25.10.2 and 26.04.6 |
-| Conda | any recent | Miniconda / Miniforge |
-| Mamba | any recent | Used to build environments faster |
+| Conda | >= 26.1.1 | Miniconda / Miniforge |
+| Mamba | >= 2.4.0 | Used to build environments faster |
 | Internet access | — | PubMLST is queried at runtime |
 | PubMLST account | — | Free; provides the data access key (see below) |
 

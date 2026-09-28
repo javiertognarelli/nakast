@@ -124,8 +124,8 @@ its GitHub repository and runs locally from the command line.
 |---|---|---|
 | Operating system | Linux | Platform on which it was developed and tested |
 | Nextflow | 25.10 or later | Tested on 25.10.2 and 26.04.6 |
-| Conda | any recent | Miniconda or Miniforge |
-| Mamba | any recent | Speeds up building the environments |
+| Conda | >= 26.1.1 | Miniconda or Miniforge |
+| Mamba | >= 2.4.0 | Speeds up building the environments |
 | Internet access | — | PubMLST is queried on every run |
 | PubMLST account | — | Free; its access key gives the complete scheme (section 2.4) |
 

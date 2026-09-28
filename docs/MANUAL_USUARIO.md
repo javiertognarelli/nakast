@@ -127,8 +127,8 @@ de su repositorio en GitHub y se ejecuta localmente desde la línea de comandos.
 |---|---|---|
 | Sistema operativo | Linux | Plataforma en la que fue desarrollado y probado |
 | Nextflow | 25.10 o posterior | Probado en 25.10.2 y 26.04.6 |
-| Conda | versión reciente | Miniconda o Miniforge |
-| Mamba | versión reciente | Acelera la construcción de los ambientes |
+| Conda | >= 26.1.1 | Miniconda o Miniforge |
+| Mamba | >= 2.4.0 | Acelera la construcción de los ambientes |
 | Acceso a internet | — | PubMLST se consulta en cada corrida |
 | Cuenta en PubMLST | — | Gratuita; su clave de acceso da el esquema completo (sección 2.4) |
 

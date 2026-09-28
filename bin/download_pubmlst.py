@@ -8,7 +8,7 @@ nor the scheme id can be hardcoded, as both vary between species.
 For a species <sp> it writes:
     <sp>_profiles.tsv   ST profile table
     <sp>_loci.txt       one locus per line, in PubMLST order
-    <sp>_alelos.fasta   all alleles concatenated, ready for `kma index`
+    <sp>_alleles.fasta   all alleles concatenated, ready for `kma index`
 """
 
 import argparse
@@ -16,6 +16,15 @@ import os
 import sys
 
 import pubmlst_api as api
+
+
+class MissingKeyError(RuntimeError):
+    """No API key and anonymous access was not requested."""
+
+
+# Exit code for errors that retrying cannot fix: a missing or rejected key.
+# The pipeline maps it to 'terminate' instead of spending its retries.
+EXIT_AUTH = 3
 
 
 def validate_profiles(text, loci, db):
@@ -49,7 +58,22 @@ def main():
     p.add_argument("--scheme", default=None,
                    help="Force a scheme id. Autodetected by default.")
     p.add_argument("--outdir", default=".", help="Output directory")
+    p.add_argument("--anonymous", action="store_true",
+                   help="Query PubMLST without an API key. Only data deposited up "
+                        "to 31 December 2024 is returned.")
     args = p.parse_args()
+
+    if api.authenticated():
+        print("[INFO] PubMLST access: authenticated with a data access key.")
+    elif args.anonymous:
+        print("[WARN] PubMLST access: anonymous. Only alleles and STs deposited up "
+              "to 31 December 2024 are available; newer ones will be missing.",
+              file=sys.stderr)
+    else:
+        raise MissingKeyError(
+            f"No PubMLST API key found in {api.API_KEY_ENV}. Store it with "
+            f"'nextflow secrets set {api.API_KEY_ENV}', or pass --anonymous to use "
+            f"only data deposited up to 31 December 2024.")
 
     db = api.resolve_db(args.species)
     sp = api.short_name(db)
@@ -83,7 +107,7 @@ def main():
 
     # --- alleles, one request per locus ---
     total = 0
-    with open(out_path(f"{sp}_alelos.fasta"), "w") as out:
+    with open(out_path(f"{sp}_alleles.fasta"), "w") as out:
         for locus in loci:
             fasta = api.get_text(f"{api.BASE_URL}/db/{db}/loci/{locus}/alleles_fasta")
             if not fasta.startswith(">"):
@@ -107,6 +131,9 @@ def main():
 if __name__ == "__main__":
     try:
         main()
+    except (api.AuthenticationError, MissingKeyError) as e:
+        print(f"[ERROR] {e}", file=sys.stderr)
+        sys.exit(EXIT_AUTH)
     except Exception as e:
         print(f"[ERROR] {e}", file=sys.stderr)
         sys.exit(1)

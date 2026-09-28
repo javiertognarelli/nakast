@@ -29,6 +29,7 @@ Third-party components and their licences are inventoried in
 | Conda | any recent | Miniconda / Miniforge |
 | Mamba | any recent | Used to build environments faster |
 | Internet access | — | PubMLST is queried at runtime |
+| PubMLST account | — | Free; provides the data access key (see below) |
 
 You do **not** need to install KMA, filtlong, chopper, NanoPlot or MultiQC yourself. Each
 process declares its own pinned Conda environment and Nextflow builds them on first run.
@@ -49,6 +50,21 @@ nextflow config .          # should show conda { enabled = true; useMamba = true
 
 The first real run builds the Conda environments (a few minutes). They are cached in
 `$HOME/.nextflow/conda` and reused afterwards.
+
+### PubMLST access key
+
+Since 2025 PubMLST serves anonymous requests only the data deposited up to 31 December 2024,
+so NAKAST requires a PubMLST **data access key** by default. Create one in your account at
+<https://pubmlst.org>, then store it once in the Nextflow secrets store:
+
+```bash
+read -rs -p "PubMLST API key: " K && nextflow secrets set PUBMLST_API_KEY "$K" && unset K
+```
+
+The key never touches the repository, the command line history or the run's work directory.
+Without an account, add `--pubmlst_anonymous` to run with data up to 2024 only; isolates of
+STs defined since then will come out untyped. See section 2.4 of the
+[User Manual](docs/USER_MANUAL.md) for details.
 
 ## Quick start
 

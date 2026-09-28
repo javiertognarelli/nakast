@@ -16,6 +16,11 @@ CHROME="${CHROME:-$(ls -d "$HOME"/.cache/puppeteer/chrome/linux-*/chrome-linux64
 [ -x "$CHROME" ] || { echo "Chrome not found; set CHROME=/path/to/chrome" >&2; exit 1; }
 
 TMP=$(mktemp -d); trap 'rm -rf "$TMP"' EXIT
+
+# Linked as an author stylesheet through pandoc rather than handed to WeasyPrint
+# with -s: a user stylesheet loses every conflict with pandoc's built-in styles,
+# whatever its specificity, which silently discarded the cover page spacing.
+CSS="$(pwd)/pdf.css"
 printf '{ "executablePath": "%s", "args": ["--no-sandbox","--disable-dev-shm-usage"] }\n' "$CHROME" > "$TMP/pc.json"
 
 build() {  # $1=markdown  $2=pdf  $3=basename for the diagram  $4=title  $5=lang
@@ -38,17 +43,18 @@ PY
     # so the cross-references written for GitHub also resolve inside the PDF.
     # lang drives WeasyPrint's hyphenation, which justified text needs.
     pandoc "$TMP/body.md" -f markdown+gfm_auto_identifiers -t html5 --standalone \
-        --metadata pagetitle="$4" --metadata lang="$5" -o "$TMP/body.html"
-    weasyprint -s pdf.css "$TMP/body.html" "$2"
+        --metadata pagetitle="$4" --metadata lang="$5" --css "$CSS" -o "$TMP/body.html"
+    weasyprint "$TMP/body.html" "$2"
     echo "  wrote $2"
 }
 
 build USER_MANUAL.md    USER_MANUAL.pdf    workflow_en "NAKAST — User Manual"       en
 build MANUAL_USUARIO.md MANUAL_USUARIO.pdf workflow_es "NAKAST — Manual de usuario" es
 
-# The licence inventory has no diagram, so it goes straight through pandoc.
+# The services and licences compilation has no diagram, so it goes straight
+# through pandoc.
 pandoc THIRD_PARTY_LICENSES.md -f markdown+gfm_auto_identifiers -t html5 --standalone \
-    --metadata pagetitle="NAKAST — Third-Party Components and Licences" --metadata lang=en \
+    --metadata pagetitle="NAKAST — Compilado de Servicios y Licencias" --metadata lang=es --css "$CSS" \
     -o "$TMP/lic.html"
-weasyprint -s pdf.css "$TMP/lic.html" THIRD_PARTY_LICENSES.pdf
+weasyprint "$TMP/lic.html" THIRD_PARTY_LICENSES.pdf
 echo "  wrote THIRD_PARTY_LICENSES.pdf"

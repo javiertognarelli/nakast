@@ -15,12 +15,34 @@ module resolves dynamically instead:
 """
 
 import json
+import os
 import sys
 import time
 import urllib.error
 import urllib.request
 
 BASE_URL = "https://rest.pubmlst.org"
+
+# PubMLST data access key. Without it the API serves only data deposited up to
+# 31 December 2024; newer alleles and STs require an account. The key is read
+# from the environment, where Nextflow places it from its secrets store, so it
+# never appears in the code, the command line or the task work directory.
+API_KEY_ENV = "PUBMLST_API_KEY"
+
+
+class AuthenticationError(RuntimeError):
+    """The API key was rejected. Retrying cannot fix this."""
+
+
+def authenticated():
+    """True when a data access key is available."""
+    return bool(os.environ.get(API_KEY_ENV, "").strip())
+
+
+def _headers():
+    key = os.environ.get(API_KEY_ENV, "").strip()
+    return {"X-API-Key": key} if key else {}
+
 
 # Retry policy for brief outages and transient 5xx responses from PubMLST.
 ATTEMPTS = 5
@@ -33,13 +55,19 @@ def _get(url, binary=False):
     last_error = None
     for attempt in range(1, ATTEMPTS + 1):
         try:
-            with urllib.request.urlopen(url, timeout=TIMEOUT) as r:
+            request = urllib.request.Request(url, headers=_headers())
+            with urllib.request.urlopen(request, timeout=TIMEOUT) as r:
                 data = r.read()
             return data if binary else data.decode("utf-8", "replace")
         except urllib.error.HTTPError as e:
             # 404 means the resource does not exist; retrying cannot help.
             if e.code == 404:
                 raise
+            # 401/403 means the key was rejected; retrying cannot help either.
+            if e.code in (401, 403):
+                raise AuthenticationError(
+                    f"PubMLST rejected the API key (HTTP {e.code}). Check the key "
+                    f"stored with 'nextflow secrets set {API_KEY_ENV}'.") from e
             last_error = e
         except Exception as e:
             last_error = e

@@ -235,7 +235,7 @@ def main():
     parser.add_argument("-l","--loci", required=False,
                         help="File with one locus per line (<species>_loci.txt). "
                              "If omitted, loci are inferred from the profile table.")
-    parser.add_argument("-o","--output", default="mlst_perfiles", help="Base name for the .txt and .xlsx reports")
+    parser.add_argument("-o","--output", default="mlst_profiles", help="Base name for the .txt and .xlsx reports")
     parser.add_argument("-d","--min_depth", type=int, default=MIN_DEPTH, help="Minimum depth to consider an allele")
     parser.add_argument("--min_identity", type=float, default=MIN_IDENTITY, help="Minimum identity to consider an allele")
     parser.add_argument("-c","--min_coverage", type=float, default=MIN_COVERAGE, help="Minimum coverage to consider an allele")

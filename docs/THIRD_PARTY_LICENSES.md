@@ -1,253 +1,168 @@
-# NAKAST — Third-Party Components and Licences
-
-**Componentes de terceros y licencias** · Version 1.0 · Compiled 2026-09-24
-
-This document inventories every third-party language, library and tool that NAKAST invokes,
-together with its version and licence, for the purposes of software registration.
-
-Este documento inventaría cada lenguaje, biblioteca y herramienta de terceros que NAKAST
-utiliza, junto con su versión y licencia, para efectos del registro de la obra.
-
----
-
-## 1. Method / Metodología
-
-Licence information was read from the `conda-meta` metadata of the exact package builds that
-the pipeline pins, not from memory or from upstream websites. Each entry can be reproduced
-with:
-
-La información de licencias fue leída desde los metadatos `conda-meta` de las compilaciones
-exactas que el pipeline fija, no de memoria ni de sitios web. Cada entrada se puede
-reproducir con:
-
-```bash
-conda search -c <channel> --override-channels <package>=<version> --info | grep -i license
-```
-
-Versions are those declared in the `conda` directives of `nakast.nf` and in
-`nextflow.config`.
-
----
-
-## 2. Runtime components / Componentes de ejecución
-
-These are executed by the pipeline at run time. NAKAST invokes each one as a **separate
-operating-system process**; it does not link against them, embed their source, or
-redistribute their binaries.
-
-Estos son ejecutados por el pipeline en tiempo de corrida. NAKAST invoca cada uno como un
-**proceso independiente del sistema operativo**; no enlaza con ellos, no incorpora su código
-fuente ni redistribuye sus binarios.
-
-### 2.1 Workflow engine / Motor de flujo de trabajo
-
-| Component | Version | Licence | Copyright holder | Source |
-|---|---|---|---|---|
-| Nextflow | 25.10.2 | Apache-2.0 | Seqera Labs | <https://github.com/nextflow-io/nextflow> |
-
-### 2.2 Programming language / Lenguaje de programación
-
-| Component | Version | Licence | Copyright holder | Source |
-|---|---|---|---|---|
-| Python | 3.13.11 | Python-2.0 (PSF) | Python Software Foundation | <https://www.python.org> |
-
-The pipeline also uses the Python standard library only (`json`, `urllib`, `argparse`, `os`,
-`glob`, `sys`, `time`, `re`, `concurrent.futures`), covered by the same licence.
-
-El pipeline usa además únicamente la biblioteca estándar de Python (`json`, `urllib`,
-`argparse`, `os`, `glob`, `sys`, `time`, `re`, `concurrent.futures`), cubierta por la misma
-licencia.
-
-### 2.3 Python libraries / Bibliotecas de Python
-
-| Component | Version | Licence | Copyright holder | Source |
-|---|---|---|---|---|
-| pandas | 2.3.3 | BSD-3-Clause | AQR Capital Management, Lambda Foundry, PyData Development Team | <https://pandas.pydata.org> |
-| NumPy | 2.4.0 | BSD-3-Clause | NumPy Developers | <https://numpy.org> |
-| openpyxl | 3.1.5 | MIT | Eric Gazoni, Charlie Clark | <https://openpyxl.readthedocs.io> |
-
-### 2.4 Bioinformatics tools / Herramientas bioinformáticas
-
-| Component | Version | Licence | Copyright holder | Source |
-|---|---|---|---|---|
-| KMA | 1.6.8 | Apache-2.0 | Philip T.L.C. Clausen, DTU | <https://bitbucket.org/genomicepidemiology/kma> |
-| Filtlong | 0.3.1 | GPL-3.0-or-later | Ryan Wick | <https://github.com/rrwick/Filtlong> |
-| Chopper | 0.12.0 | MIT | Wouter De Coster | <https://github.com/wdecoster/chopper> |
-| NanoPlot | 1.46.2 | MIT | Wouter De Coster | <https://github.com/wdecoster/NanoPlot> |
-| MultiQC | 1.33 | GPL-3.0-or-later | Phil Ewels, Seqera | <https://multiqc.info> |
-
-### 2.5 System utilities / Utilidades del sistema
-
-| Component | Version | Licence | Copyright holder | Source |
-|---|---|---|---|---|
-| GNU coreutils | 9.5 | GPL-3.0-or-later | Free Software Foundation | <https://www.gnu.org/software/coreutils/> |
-| gzip | 1.12 | GPL-3.0-or-later | Free Software Foundation | <https://www.gnu.org/software/gzip/> |
-
----
-
-## 3. Build-time tooling / Herramientas de construcción
-
-Used to create the execution environments. They are **not** part of the delivered software
-and are not redistributed with it.
-
-Se usan para crear los ambientes de ejecución. **No** forman parte del software entregado ni
-se redistribuyen con él.
-
-| Component | Version | Licence | Source |
-|---|---|---|---|
-| conda | 26.1.1 | BSD-3-Clause | <https://docs.conda.io> |
-| mamba | 2.4.0 | BSD-3-Clause | <https://mamba.readthedocs.io> |
-
-Packages are obtained from the **conda-forge** and **bioconda** community channels, which
-act as distributors. The licence that governs each package is the upstream licence listed
-above, not a channel licence.
-
-Los paquetes se obtienen de los canales comunitarios **conda-forge** y **bioconda**, que
-actúan como distribuidores. La licencia que rige cada paquete es la del proyecto original
-listada arriba, no una licencia del canal.
-
----
-
-## 4. Reference data / Datos de referencia
-
-NAKAST is not distributed with biological reference data. It downloads it at run time.
-
-NAKAST no se distribuye con datos biológicos de referencia. Los descarga en tiempo de
-ejecución.
-
-| Resource | Provider | Access | Terms |
-|---|---|---|---|
-| PubMLST allele sequences and ST profiles | PubMLST, University of Oxford | REST API, <https://rest.pubmlst.org> | See <https://pubmlst.org/about/terms> |
-
-PubMLST data is publicly available for academic use. It is **not** redistributed as part of
-this software: each run fetches it directly from the provider, and the copy saved among the
-run outputs belongs to the user's own results.
-
-Los datos de PubMLST son de acceso público para uso académico. **No** se redistribuyen como
-parte de este software: cada corrida los obtiene directamente del proveedor, y la copia que
-queda entre las salidas pertenece a los resultados propios del usuario.
-
-Attribution requested by the provider:
-
-Atribución solicitada por el proveedor:
-
-> Jolley KA, Bray JE, Maiden MCJ. Open-access bacterial population genomics: BIGSdb
-> software, the PubMLST.org website and their applications. *Wellcome Open Res* 2018;3:124.
-
----
-
-## 5. Licence compatibility analysis / Análisis de compatibilidad
-
-### 5.1 Summary by licence family / Resumen por familia de licencia
-
-| Licence | Components | Type |
-|---|---|---|
-| Apache-2.0 | Nextflow, KMA | Permissive |
-| BSD-3-Clause | pandas, NumPy, conda, mamba | Permissive |
-| MIT | openpyxl, Chopper, NanoPlot | Permissive |
-| Python-2.0 (PSF) | Python | Permissive |
-| GPL-3.0-or-later | Filtlong, MultiQC, coreutils, gzip | Copyleft |
-
-### 5.2 Effect of the GPL components / Efecto de los componentes GPL
-
-Four components are licensed under GPL-3.0-or-later. This matters for registration, so the
-relationship is stated explicitly.
-
-Cuatro componentes están bajo GPL-3.0-or-later. Esto importa para el registro, así que la
-relación se explicita.
-
-NAKAST is a **workflow orchestrator**. It invokes these tools as independent command-line
-processes through Nextflow, communicating only through files and standard streams. It does
-not:
-
-NAKAST es un **orquestador de flujos de trabajo**. Invoca estas herramientas como procesos
-independientes de línea de comandos a través de Nextflow, comunicándose únicamente mediante
-archivos y flujos estándar. No:
-
-- link against their libraries / enlaza con sus bibliotecas
-- incorporate or derive from their source code / incorpora ni deriva de su código fuente
-- distribute their binaries / distribuye sus binarios
-- create a combined work in the sense of the GPL / crea una obra combinada en el sentido de
-  la GPL
-
-Under the Free Software Foundation's own reading, this is **mere aggregation**: separate
-programs communicating at arm's length, each retaining its own licence. The copyleft
-obligations of the GPL therefore do not extend to the NAKAST source code, and NAKAST may
-carry a licence of the owner's choosing.
-
-Según la lectura de la propia Free Software Foundation, esto constituye **mera agregación**:
-programas separados que se comunican a distancia, cada uno conservando su propia licencia.
-Las obligaciones de copyleft de la GPL, por lo tanto, no se extienden al código fuente de
-NAKAST, y NAKAST puede llevar la licencia que su titular decida.
-
-Reference / Referencia: <https://www.gnu.org/licenses/gpl-faq.html#MereAggregation>
-
-### 5.3 Conditions to observe / Condiciones a observar
-
-| Licence | Obligation when redistributing |
-|---|---|
-| Apache-2.0 | Retain copyright and licence notices; state modifications; includes a patent grant |
-| BSD-3-Clause | Retain copyright notice and disclaimer; do not use contributors' names for endorsement |
-| MIT | Retain copyright notice and permission notice |
-| Python-2.0 | Retain PSF copyright notice |
-| GPL-3.0-or-later | If the binaries are redistributed, provide the corresponding source. Not triggered here: NAKAST does not redistribute them |
-
-None of these licences restricts commercial use, and none requires payment.
-
-Ninguna de estas licencias restringe el uso comercial, y ninguna exige pago.
-
-### 5.4 Conclusion / Conclusión
-
-The third-party components used by NAKAST are all free and open-source software under
-licences that are mutually compatible in this architecture. Their use is compatible with
-registering NAKAST as a work and with its subsequent use, whether academic or commercial.
-
-Los componentes de terceros que utiliza NAKAST son en su totalidad software libre y de código
-abierto, bajo licencias mutuamente compatibles en esta arquitectura. Su uso es compatible con
-el registro de NAKAST como obra y con su utilización posterior, sea académica o comercial.
-
----
-
-## 6. Licence of NAKAST itself / Licencia de NAKAST
-
-> **Pending decision.** This is a separate matter from the inventory above and must be
-> resolved by the owner before deposit.
->
-> **Decisión pendiente.** Es un asunto distinto del inventario anterior y debe resolverlo el
-> titular antes del depósito.
-
-The inventory above covers third-party components. It does not assign a licence to NAKAST's
-own source code. A repository published without a licence file is, by default, **all rights
-reserved**, which prevents others from legally using or citing the work.
-
-El inventario anterior cubre componentes de terceros. No asigna licencia al código fuente
-propio de NAKAST. Un repositorio publicado sin archivo de licencia queda, por defecto, con
-**todos los derechos reservados**, lo que impide a terceros usar o citar la obra legalmente.
-
-Options consistent with the components in use:
-
-Opciones consistentes con los componentes utilizados:
-
-| Licence | Effect |
-|---|---|
-| MIT | Maximum reuse; requires only attribution |
-| Apache-2.0 | Like MIT plus an explicit patent grant; common for institutional software |
-| GPL-3.0 | Requires derivative works to remain open source |
-
----
-
-## 7. Provenance note / Nota de procedencia
-
-All version and licence values in sections 2 and 3 were extracted programmatically from the
-installed `conda-meta` package metadata on 2026-09-24 and cross-checked against the
-`conda` directives declared in `nakast.nf`. Copyright holders and source URLs were taken from
-each project's canonical repository.
-
-Todos los valores de versión y licencia de las secciones 2 y 3 fueron extraídos
-programáticamente de los metadatos `conda-meta` instalados el 2026-09-24 y contrastados con
-las directivas `conda` declaradas en `nakast.nf`. Los titulares de copyright y las URL de
-origen se tomaron del repositorio canónico de cada proyecto.
-
-This document is informational and does not constitute legal advice.
-
-Este documento es informativo y no constituye asesoría legal.
+<div class="cover" align="center">
+
+# NAKAST
+
+<p class="cover-subtitle">Compilado de Servicios y Licencias</p>
+
+<p class="cover-institution">UNIVERSIDAD DE VALPARAÍSO</p>
+
+<p class="cover-authors">Autores:<br>
+JAVIER ALEJANDRO TOGNARELLI SANTIAGO<br>
+DANIEL FERNANDO ESCOBAR ARAYA<br>
+FERNANDO ANDRÉS AMAYA INZUNZA</p>
+
+<p class="cover-date">SEPTIEMBRE 2026</p>
+
+</div>
+
+<div class="page-break"></div>
+
+## 1. Introducción
+
+El presente documento tiene como propósito declarar de forma transparente todos los servicios
+externos, bibliotecas de código abierto y licencias de software utilizados en la plataforma
+NAKAST.
+
+NAKAST es un pipeline de línea de comandos, desarrollado en Nextflow, que determina perfiles
+MLST a partir de lecturas de secuenciación Oxford Nanopore. Se ejecuta en el equipo del
+usuario y no cuenta con componentes de servidor, interfaz web ni base de datos propia.
+
+Las versiones y licencias de las secciones 4.1 a 4.3 se obtuvieron de los metadatos
+(`conda-meta`) de las compilaciones exactas que el pipeline fija en sus directivas `conda`, y
+no de memoria ni de sitios web de terceros. Los términos de PubMLST de la sección 2.1 se
+consultaron en el sitio oficial del proveedor en septiembre de 2026.
+
+## 2. Servicios Externos
+
+### 2.1 PubMLST — API REST
+
+- **Proveedor:** PubMLST, Universidad de Oxford (Reino Unido).
+- **Modelo/Versión:** API REST (`https://rest.pubmlst.org`), consultada con la clave de
+  acceso a datos (*data access key*) de la cuenta de cada usuario, enviada en el encabezado
+  `X-API-Key`. No tiene versión fija: se consulta en cada corrida.
+- **Uso en la obra:** descarga del esquema MLST de cada especie analizada (secuencias de
+  alelos, lista de loci y tabla de perfiles ST), que NAKAST indexa y usa como referencia para
+  tipificar las muestras.
+- **Tipo de licencia:** acceso mediante clave de acceso a datos personal, sujeto a los
+  términos y condiciones del sitio, que distinguen dos tipos de datos:
+  - *Depositados hasta el 31 de diciembre de 2024:* pueden descargarse, usarse y
+    redistribuirse sin restricción, incluido el uso comercial, sujeto solo a la cita y el
+    reconocimiento correspondientes.
+  - *Depositados desde el 1 de enero de 2025:* solo pueden usarse para investigación
+    académica no comercial o para vigilancia en salud pública, y no pueden redistribuirse
+    ni incorporarse a bases de datos o servicios públicos o comerciales. Su uso comercial
+    requiere una licencia de la Universidad de Oxford.
+
+  La clave es personal y **no se distribuye con la obra**: cada usuario debe crear la suya en
+  su propia cuenta y almacenarla en su equipo. NAKAST tampoco redistribuye datos de PubMLST;
+  los descarga en cada corrida en el equipo del usuario. Sin clave, la obra puede operar en
+  modo anónimo (`--pubmlst_anonymous`), limitado a los datos anteriores a 2025.
+- **Modelo de cobro:** gratuito. La cuenta y la clave de acceso no tienen costo.
+- **URL Oficial:** <https://pubmlst.org> · Términos: <https://pubmlst.org/terms-conditions>
+
+Los términos exigen incluir el siguiente reconocimiento en toda publicación basada en datos
+de PubMLST, además de citar a Jolley et al., *Wellcome Open Res* 2018, 3:124:
+
+> This publication made use of the PubMLST website (https://pubmlst.org/) sited at the
+> University of Oxford. The development of that website was funded by the Wellcome Trust.
+
+### 2.2 Canales de paquetes conda-forge y Bioconda
+
+- **Proveedor:** comunidad conda-forge y proyecto Bioconda, con los paquetes alojados en
+  anaconda.org.
+- **Modelo/Versión:** canales `conda-forge` y `bioconda`. Las versiones de cada paquete están
+  fijadas en la obra (sección 4).
+- **Uso en la obra:** distribución e instalación automática de las herramientas que ejecuta
+  cada proceso del pipeline.
+- **Tipo de licencia:** canales comunitarios de libre acceso. Cada paquete conserva la
+  licencia de su proyecto original, detallada en la sección 4. Todos los paquetes se declaran
+  desde estos dos canales y no desde el canal `defaults` de Anaconda, cuyo uso institucional
+  puede estar sujeto a pago.
+- **Modelo de cobro:** gratuito.
+- **URL Oficial:** <https://conda-forge.org> · <https://bioconda.github.io>
+
+## 3. Infraestructura de Despliegue
+
+NAKAST no tiene componentes de servidor (*backend*) ni de interfaz web (*frontend*): se
+ejecuta desde la línea de comandos en el equipo del usuario. La tabla adapta la plantilla a
+esa arquitectura.
+
+| Componente | Plataforma | Plan | Modelo de Costo |
+|------|-----------|-----|-------|
+| Ejecución del pipeline | Equipo del usuario, sistema operativo Linux | No aplica | Sin costo de licencia; hardware propio del usuario |
+| Motor de flujo de trabajo | Nextflow, ejecutor local | Código abierto | Gratuito |
+| Gestión de ambientes | Conda / Mamba, canales conda-forge y Bioconda | Código abierto | Gratuito |
+| Distribución del código | GitHub (`github.com/javiertognarelli/nakast`) | Repositorio público | Gratuito |
+| Base de Datos | No aplica: no hay base propia; los esquemas se obtienen de PubMLST en cada corrida | No aplica | Gratuito |
+
+## 4. Bibliotecas de Código Abierto (Open Source)
+
+NAKAST invoca cada herramienta como un proceso independiente del sistema operativo. No enlaza
+con sus bibliotecas, no incorpora su código fuente y no redistribuye sus binarios: los
+ambientes se construyen en el equipo del usuario a partir de los canales de la sección 2.2.
+
+### 4.1 Herramientas de ejecución y bioinformáticas
+
+| Paquete | Versión | Licencia | Uso |
+|------|----|------|--------------|
+| Nextflow | 25.10.2 | Apache-2.0 | Motor que orquesta y ejecuta el flujo de trabajo |
+| KMA | 1.6.8 | Apache-2.0 | Indexación de la base de alelos y alineamiento de lecturas |
+| Filtlong | 0.3.1 | GPL-3.0-or-later | Filtrado de lecturas por longitud y calidad |
+| Chopper | 0.12.0 | MIT | Filtrado de lecturas por calidad Phred |
+| NanoPlot | 1.46.2 | MIT | Control de calidad de lecturas por muestra |
+| MultiQC | 1.33 | GPL-3.0-or-later | Reporte agregado de control de calidad |
+| GNU coreutils | 9.5 | GPL-3.0-or-later | Concatenación de archivos FASTQ |
+| gzip | 1.12 | GPL-3.0-or-later | Compresión y descompresión de lecturas |
+
+### 4.2 Lenguaje y bibliotecas de Python
+
+| Paquete | Versión | Licencia | Uso |
+|------|----|------|--------------|
+| Python | 3.13.11 | Python-2.0 (PSF) | Lenguaje de los scripts de validación, descarga y reporte |
+| pandas | 2.3.3 | BSD-3-Clause | Lectura de tablas, llamado de alelos y asignación de ST |
+| NumPy | 2.4.0 | BSD-3-Clause | Cálculo del puntaje de confianza de cada alelo |
+| openpyxl | 3.1.5 | MIT | Escritura del reporte final en formato Excel |
+
+Los scripts usan además solo módulos de la biblioteca estándar de Python (`json`, `urllib`,
+`argparse`, `os`, `glob`, `sys`, `time`, `re`, `concurrent.futures`), cubiertos por la misma
+licencia de Python.
+
+### 4.3 Herramientas de instalación
+
+Se usan solo para construir los ambientes de ejecución. No forman parte de la obra ni se
+distribuyen con ella.
+
+| Paquete | Versión | Licencia | Uso |
+|------|----|------|--------------|
+| conda | 26.1.1 | BSD-3-Clause | Creación de los ambientes de cada proceso |
+| mamba | 2.4.0 | BSD-3-Clause | Resolución rápida de dependencias al crear los ambientes |
+
+### 4.4 Nota sobre los componentes con licencia GPL
+
+Cuatro componentes (Filtlong, MultiQC, GNU coreutils y gzip) tienen licencia
+GPL-3.0-or-later, de tipo *copyleft*. Como NAKAST solo los invoca como programas separados,
+comunicándose con ellos mediante archivos y flujos estándar, la relación constituye una
+**mera agregación** según la interpretación de la propia Free Software Foundation
+(<https://www.gnu.org/licenses/gpl-faq.html#MereAggregation>). Las obligaciones de *copyleft*
+no se extienden, por lo tanto, al código fuente de NAKAST.
+
+## 5. Resumen Ejecutivo
+
+NAKAST **no requiere licencias pagadas fijas**. Todos los componentes de terceros son
+software libre y de código abierto bajo licencias Apache-2.0, BSD-3-Clause, MIT, PSF o
+GPL-3.0, compatibles entre sí en esta arquitectura, y ninguno restringe el uso comercial ni
+exige pago.
+
+El único servicio externo de datos, PubMLST, es gratuito. NAKAST lo consulta con la clave
+de acceso personal de cada usuario, que no se distribuye con la obra. Los datos depositados
+desde 2025 que se obtienen de esta forma están restringidos a uso académico no comercial y
+de vigilancia en salud pública; su uso comercial requiere una licencia de la Universidad de
+Oxford. Esta restricción recae sobre los datos y sobre quien los descarga, no sobre el código
+de NAKAST, que no incorpora ni redistribuye datos de PubMLST.
+
+La obra **no tiene costos operativos recurrentes** asociados a licencias ni servicios. Su
+operación requiere únicamente el equipo de cómputo del usuario, con sistema operativo Linux,
+una cuenta gratuita en PubMLST y conexión a internet para consultar PubMLST y, en la primera
+ejecución, descargar los paquetes de software.
+
+*Este documento es informativo y no constituye asesoría legal.*

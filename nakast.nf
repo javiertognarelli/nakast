@@ -52,6 +52,11 @@ params.run_description = 'NAKAST: MLST typing from Oxford Nanopore reads, for an
 params.species_catalogue = "$projectDir/assets/pubmlst_species.tsv"
 params.kma_k = 31
 
+// PubMLST access. By default a data access key is required, read from the
+// Nextflow secrets store as PUBMLST_API_KEY. Anonymous access returns only data
+// deposited up to 31 December 2024, so it must be requested explicitly.
+params.pubmlst_anonymous = false
+
 params.qc_only = false
 params.list_species = false
 params.help = false
@@ -97,6 +102,12 @@ def print_help() {
         --qc_only            Run quality control only (default: false)
         --list_species       List the supported PubMLST species and exit
 
+        PubMLST access:
+        A PubMLST data access key is required. Store it once with:
+            nextflow secrets set PUBMLST_API_KEY <key>
+        --pubmlst_anonymous  Run without a key; only data deposited up to
+                             31 December 2024 is used (default: false)
+
         Other:
         --kma_k              K-mer size for the KMA index (default: 31)
         --help               Print this message and exit
@@ -114,7 +125,7 @@ def print_help() {
 
     """.stripIndent()
 }
-workflow PRINCIPAL {
+workflow MLST_TYPING {
     main:
         // 1. Resolve inputs
         ch_input = file(params.samplesheet, checkIfExists: true, followLinks: true)
@@ -147,20 +158,22 @@ workflow PRINCIPAL {
         // One database per distinct species; 'unique' avoids re-downloading
         // the same scheme for every sample that shares it.
         ch_species = ch_reads.map { sample, _reads -> sample.species }.unique()
-        DOWNLOAD_PREP_DB(ch_species)
+        def db = params.pubmlst_anonymous
+            ? DOWNLOAD_PREP_DB_ANONYMOUS(ch_species)
+            : DOWNLOAD_PREP_DB(ch_species)
 
         // Join each sample to the database built for its own species.
         ch_kma = FILTER_ONT.out.filtered_reads
             .map { sample, reads -> [ sample.species, sample, reads ] }
-            .combine(DOWNLOAD_PREP_DB.out.mlst_db, by: 0)
+            .combine(db.mlst_db, by: 0)
         KMA_RUN(ch_kma)
 
         // One report per species: loci differ between schemes and cannot
         // share a single table of columns.
-        ch_reporte = KMA_RUN.out.kma_result
+        ch_report = KMA_RUN.out.kma_result
             .groupTuple()
-            .join(DOWNLOAD_PREP_DB.out.mlst_profiles)
-        GENERATE_REPORT(ch_reporte)
+            .join(db.mlst_profiles)
+        GENERATE_REPORT(ch_report)
 }
 workflow list_species {
     main:
@@ -171,7 +184,7 @@ workflow qc_only {
         ch_input = file(params.samplesheet, checkIfExists: true, followLinks: true)
         ch_catalogue = file(params.species_catalogue, checkIfExists: true)
 
-        // Same pre-flight validation as PRINCIPAL: the read channel derives
+        // Same pre-flight validation as MLST_TYPING: the read channel derives
         // from its output, so nothing runs on an invalid samplesheet.
         VALIDATE_SAMPLESHEET(ch_input, "${launchDir}", ch_catalogue)
 
@@ -201,6 +214,23 @@ workflow {
         return
     }
 
+    // Fail before any work starts when typing would need a key that is not
+    // there. QC-only and species listing do not download scheme data.
+    def needs_download = !params.list_species && !params.qc_only
+    if (needs_download && !params.pubmlst_anonymous && !params.pubmlst_key_found) {
+        error '''
+            No PubMLST API key found.
+
+            NAKAST needs a PubMLST data access key to obtain the complete MLST
+            scheme; without one, PubMLST only serves data deposited up to
+            31 December 2024. Create a key in your PubMLST account and store it:
+
+                nextflow secrets set PUBMLST_API_KEY <key>
+
+            To run anyway with data up to 2024 only, add --pubmlst_anonymous.
+            '''.stripIndent()
+    }
+
     if (params.list_species) {
         list_species()
     }
@@ -208,7 +238,7 @@ workflow {
         qc_only()
     }
     else {
-        PRINCIPAL()
+        MLST_TYPING()
     }
 }
 process VALIDATE_SAMPLESHEET {
@@ -242,17 +272,52 @@ process VALIDATE_SAMPLESHEET {
         cat validacion.ok
         """
 }
+// Script shared by both download processes. Only the access mode differs.
+def download_script(species, anonymous) {
+    """
+    download_pubmlst.py --species ${species} --outdir . ${anonymous ? '--anonymous' : ''}
+
+    kma index -i ${species}_alleles.fasta -k ${params.kma_k} -o ${species}_db
+    """
+}
+
 process DOWNLOAD_PREP_DB {
     tag "$species"
     conda 'conda-forge::python=3.13.11 bioconda::kma=1.6.8'
     label 'process_low'
     publishDir "${params.report_outdir}", mode: 'copy', pattern: "*_profiles.tsv"
 
+    // Exposed to the task as an environment variable. Nextflow keeps secrets
+    // out of the work directory, the command line and the logs.
+    secret 'PUBMLST_API_KEY'
+
     // Overrides the global 'ignore' strategy: without a database there is no
     // typing, so a skipped failure would yield a run with no results.
-    // Retries cover transient network faults; 'finish' then lets in-flight QC
-    // complete before stopping, so a later -resume reuses it and repeats only
-    // the download.
+    // Exit code 3 means the key is missing or was rejected, which retrying
+    // cannot fix. Any other failure is treated as a transient network fault:
+    // retried, then 'finish' lets in-flight QC complete before stopping, so a
+    // later -resume reuses it and repeats only the download.
+    errorStrategy { task.exitStatus == 3 ? 'terminate' : (task.attempt <= 3 ? 'retry' : 'finish') }
+    maxRetries 3
+
+    input:
+        val species
+    output:
+        tuple val(species), path("${species}_profiles.tsv"), path("${species}_loci.txt"), emit: mlst_profiles
+        tuple val(species), path("${species}_db.*"), emit: mlst_db
+    script:
+        download_script(species, false)
+}
+
+// Same as DOWNLOAD_PREP_DB without the secret, for --pubmlst_anonymous. A
+// separate process is needed because declaring a secret that does not exist
+// aborts the task, and the directive cannot be made conditional.
+process DOWNLOAD_PREP_DB_ANONYMOUS {
+    tag "$species"
+    conda 'conda-forge::python=3.13.11 bioconda::kma=1.6.8'
+    label 'process_low'
+    publishDir "${params.report_outdir}", mode: 'copy', pattern: "*_profiles.tsv"
+
     errorStrategy { task.attempt <= 3 ? 'retry' : 'finish' }
     maxRetries 3
 
@@ -262,13 +327,7 @@ process DOWNLOAD_PREP_DB {
         tuple val(species), path("${species}_profiles.tsv"), path("${species}_loci.txt"), emit: mlst_profiles
         tuple val(species), path("${species}_db.*"), emit: mlst_db
     script:
-        // download_pubmlst.py detects the MLST scheme (not always id 1) and
-        // reads its locus list from the scheme definition (not always seven).
-        """
-        download_pubmlst.py --species ${species} --outdir .
-
-        kma index -i ${species}_alelos.fasta -k ${params.kma_k} -o ${species}_db
-        """
+        download_script(species, true)
 }
 process concat_ONT_fastq {
     tag "$sample.id"
@@ -284,7 +343,7 @@ process concat_ONT_fastq {
     script:
         """
         if ls ${input_dir}/*.fastq.gz > /dev/null 2>&1; then
-            echo "Concatenando archivos comprimidos..."
+            echo "Concatenating compressed files..."
             cat ${input_dir}/*.fastq.gz > ${sample.id}.unfiltered.fastq.gz
         
         # Fall back to uncompressed .fastq

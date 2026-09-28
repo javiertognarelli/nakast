@@ -1,46 +1,85 @@
-# NAKAST — User Manual
+<div class="cover" align="center">
 
-Version 1.0 · Complete reference for running and interpreting NAKAST.
+# NAKAST
 
-For a five-minute first run, see the [README](../README.md). This manual assumes you have
-already installed the pipeline and covers what the README does not: how to read your
-results, what the pipeline assumes about your data, and where its limits are.
+<p class="cover-subtitle">User Manual</p>
 
-## Contents
+<p class="cover-institution">UNIVERSIDAD DE VALPARAÍSO</p>
 
-**Getting started**
+<p class="cover-authors">Authors:<br>
+JAVIER ALEJANDRO TOGNARELLI SANTIAGO<br>
+DANIEL FERNANDO ESCOBAR ARAYA<br>
+FERNANDO ANDRÉS AMAYA INZUNZA</p>
 
-[1. What NAKAST does](#1-what-nakast-does)\
-[2. Background concepts](#2-background-concepts)\
-[3. A complete worked example](#3-a-complete-worked-example)
+<p class="cover-date">SEPTEMBER 2026</p>
 
-**Using the pipeline**
+</div>
 
-[4. Input specification](#4-input-specification)\
-[5. Parameter reference](#5-parameter-reference)\
-[6. Output reference](#6-output-reference)\
-[7. Interpreting your results](#7-interpreting-your-results)\
-[8. Assessing data quality](#8-assessing-data-quality)
+<div class="page-break"></div>
 
-**Reference**
+## Table of Contents
 
-[9. Workflow architecture](#9-workflow-architecture)\
-[10. How allele calling works](#10-how-allele-calling-works)\
-[11. ST and CC assignment](#11-st-and-cc-assignment)\
-[12. Species support](#12-species-support)\
-[13. Assumptions](#13-assumptions)\
-[14. Limitations](#14-limitations)\
-[15. Troubleshooting](#15-troubleshooting)\
-[16. Reproducibility](#16-reproducibility)\
-[17. Design notes](#17-design-notes)\
-[18. Support, citation and licence](#18-support-citation-and-licence)
+[1. Introduction](#1-introduction)\
+[2. Access and installation](#2-access-and-installation)\
+&emsp;&emsp;[2.1 Requirements](#21-requirements)\
+&emsp;&emsp;[2.2 Download](#22-download)\
+&emsp;&emsp;[2.3 Verifying the installation](#23-verifying-the-installation)\
+&emsp;&emsp;[2.4 PubMLST access key](#24-pubmlst-access-key)\
+&emsp;&emsp;[2.5 Running without Conda](#25-running-without-conda)\
+[3. Analysis module: using the pipeline](#3-analysis-module-using-the-pipeline)\
+&emsp;&emsp;[3.1 A complete worked example](#31-a-complete-worked-example)\
+&emsp;&emsp;[3.2 Input specification](#32-input-specification)\
+&emsp;&emsp;[3.3 Parameter reference](#33-parameter-reference)\
+&emsp;&emsp;[3.4 Output reference](#34-output-reference)\
+&emsp;&emsp;[3.5 Interpreting your results](#35-interpreting-your-results)\
+&emsp;&emsp;[3.6 Assessing data quality](#36-assessing-data-quality)\
+[4. Technical module: administration and maintenance](#4-technical-module-administration-and-maintenance)\
+&emsp;&emsp;[4.1 Workflow architecture](#41-workflow-architecture)\
+&emsp;&emsp;[4.2 How allele calling works](#42-how-allele-calling-works)\
+&emsp;&emsp;[4.3 ST and CC assignment](#43-st-and-cc-assignment)\
+&emsp;&emsp;[4.4 Species support](#44-species-support)\
+&emsp;&emsp;[4.5 Assumptions](#45-assumptions)\
+&emsp;&emsp;[4.6 Limitations](#46-limitations)\
+&emsp;&emsp;[4.7 Reproducibility](#47-reproducibility)\
+&emsp;&emsp;[4.8 Design notes](#48-design-notes)\
+[5. Support, citation and licence](#5-support-citation-and-licence)\
+&emsp;&emsp;[5.1 Reporting problems](#51-reporting-problems)\
+&emsp;&emsp;[5.2 Authorship](#52-authorship)\
+&emsp;&emsp;[5.3 How to cite NAKAST](#53-how-to-cite-nakast)\
+&emsp;&emsp;[5.4 References for the components](#54-references-for-the-components)\
+&emsp;&emsp;[5.5 Third-party components and data source](#55-third-party-components-and-data-source)\
+[6. Frequently asked questions](#6-frequently-asked-questions)
 
----
+*Una versión en español de este manual está disponible en
+[`MANUAL_USUARIO.md`](MANUAL_USUARIO.md).*
 
-## 1. What NAKAST does
+<div class="page-break"></div>
 
-NAKAST determines MLST profiles from Oxford Nanopore amplicon reads. You supply FASTQ
-directories and a species name; it returns a table of Sequence Types.
+## 1. Introduction
+
+NAKAST is a Nextflow pipeline that determines the MLST profile of bacterial isolates from
+Oxford Nanopore (ONT) amplicon sequencing reads. Given the FASTQ files of each sample and the
+name of its species, it returns a table with the Sequence Type (ST) of every isolate and,
+where the scheme defines one, its Clonal Complex (CC).
+
+**MLST** (*Multi Locus Sequence Typing*) characterises an isolate by the sequence of a small
+set of housekeeping genes, usually seven. Each distinct sequence at a locus receives an
+**allele number**; the ordered set of these numbers forms the **allelic profile** (for
+example `9-1-4-1-3-3-2`), and each distinct profile corresponds to a **Sequence Type**. A
+profile matches an ST only if every allele is an exact match to a known allele. Related STs,
+which share most of their alleles, are grouped into **clonal complexes**.
+
+Allele and profile definitions come from **PubMLST**, which NAKAST queries on every run to
+obtain the current scheme for the species. Reads are aligned against those alleles with
+**KMA**, an aligner designed for redundant databases such as MLST's, able to tell apart
+alleles that differ by only a few bases.
+
+The pipeline works with any of the 135 PubMLST MLST schemes that define ST profiles. The
+species is declared per sample, so a single run may include several species: the database is
+downloaded once per species and one report is produced for each.
+
+Figure 1 summarises the workflow, from validating the sample table to producing the final
+report.
 
 ```mermaid
 flowchart TD
@@ -71,38 +110,96 @@ flowchart TD
     style SS fill:#fff3cd,stroke:#d39e00
 ```
 
-The species acts as a **grouping key**: the database is downloaded once per distinct species,
-each sample is matched to the database of its own species, and one report is produced per
-species. A single run may therefore mix species.
+<p class="figure-caption"><em>Figure 1. NAKAST workflow. Input in yellow, the external data
+source in blue and the final results in green.</em></p>
 
-## 2. Background concepts
+## 2. Access and installation
 
-**MLST (Multi Locus Sequence Typing)** characterises a bacterial isolate by sequencing a
-small set of housekeeping gene fragments, usually seven. Each distinct sequence at a locus
-receives an integer **allele number**, curated centrally.
+NAKAST requires no registration or user account. It is distributed as source code through
+its GitHub repository and runs locally from the command line.
 
-**Allelic profile** is the ordered set of allele numbers, for example `9-1-4-1-3-3-2`.
+### 2.1 Requirements
 
-**Sequence Type (ST)** is an integer assigned to each distinct allelic profile. A profile
-matches an ST only if *every* allele is an exact match to a known allele. One uncharacterised
-locus leaves the isolate untyped.
+| Component | Version | Notes |
+|---|---|---|
+| Operating system | Linux | Platform on which it was developed and tested |
+| Nextflow | 25.10 or later | Tested on 25.10.2 and 26.04.6 |
+| Conda | any recent | Miniconda or Miniforge |
+| Mamba | any recent | Speeds up building the environments |
+| Internet access | — | PubMLST is queried on every run |
+| PubMLST account | — | Free; its access key gives the complete scheme (section 2.4) |
 
-**Clonal Complex (CC)** groups related STs that share most of their alleles. Not every scheme
-defines clonal complexes: 102 of the 135 supported schemes do. The rest report `CC = -`,
-which is correct rather than a failure.
+You do not need to install KMA, filtlong, chopper, NanoPlot or MultiQC: each process declares
+its own Conda environment with pinned versions, and Nextflow builds them on first run.
 
-**PubMLST** (<https://pubmlst.org>) hosts the reference allele sequences and profile tables.
-NAKAST queries its REST API directly, so results reflect the current state of the database.
+### 2.2 Download
 
-**KMA** is the aligner. It maps reads against a k-mer indexed database of allele sequences
-and reports identity, coverage and depth per template. It suits redundant amplicon data
-because it resolves which of many near-identical alleles best explains the reads.
+```bash
+git clone https://github.com/javiertognarelli/nakast.git
+cd nakast
+```
 
-## 3. A complete worked example
+### 2.3 Verifying the installation
+
+```bash
+nextflow run nakast.nf --help
+nextflow config .          # should show conda { enabled = true; useMamba = true }
+```
+
+The first real run builds the Conda environments, which adds a few minutes. They are stored
+in `$HOME/.nextflow/conda` and reused on later runs.
+
+### 2.4 PubMLST access key
+
+Since 2025, PubMLST serves unauthenticated requests only the data deposited up to 31 December
+2024. Alleles and STs defined later require an account. NAKAST therefore requires, by
+default, a PubMLST **data access key**, which it sends with every request.
+
+To obtain one, sign in to your account at <https://pubmlst.org> and create a data access key.
+Then store it once in the Nextflow secrets store:
+
+```bash
+read -rs -p "PubMLST API key: " K && nextflow secrets set PUBMLST_API_KEY "$K" && unset K
+```
+
+The command reads the key without echoing it or leaving it in the shell history. Nextflow
+keeps it in `$HOME/.nextflow/secrets/`, in a file only your user can read, and hands it to the
+download process without writing it to the work directory, the logs or the results. To
+confirm it was stored:
+
+```bash
+nextflow secrets list        # should list PUBMLST_API_KEY
+```
+
+The key is personal: every user must use their own and never put it in the repository or in
+configuration files.
+
+Without an account you can still run by adding `--pubmlst_anonymous`. In that mode NAKAST uses
+only data deposited up to 31 December 2024, and any isolate of an ST or allele defined later
+will come out untyped.
+
+### 2.5 Running without Conda
+
+If you prefer to manage the tools yourself, the `host` profile disables Conda and uses
+whatever is on your `PATH`:
+
+```bash
+nextflow run nakast.nf -profile host --samplesheet samplesheet.tsv
+```
+
+You then need `kma`, `filtlong`, `chopper`, `NanoPlot`, `multiqc`, and Python with `pandas`,
+`numpy` and `openpyxl`. This is not the recommended mode: it gives up the reproducibility
+that the pinned environments provide.
+
+## 3. Analysis module: using the pipeline
+
+This section is for whoever runs the pipeline and interprets its results.
+
+### 3.1 A complete worked example
 
 A run of three *Streptococcus agalactiae* isolates, from raw data to interpretation.
 
-### Step 1 — check your input data
+#### Step 1 — check your input data
 
 Your basecalled, demultiplexed reads, one directory per sample:
 
@@ -113,14 +210,14 @@ ls ~/run_2026_03/fastq_pass/barcode01/ | head -3
 # FBD86797_pass_barcode01_0.fastq.gz
 ```
 
-### Step 2 — find the species name
+#### Step 2 — find the species name
 
 ```bash
 nextflow run nakast.nf --list_species | grep -i agalactiae
 # sagalactiae    1    7  yes  Streptococcus agalactiae
 ```
 
-### Step 3 — write the samplesheet
+#### Step 3 — write the samplesheet
 
 Three tab-separated columns:
 
@@ -133,7 +230,7 @@ printf 'SGB13\t%s/barcode03\tsagalactiae\n' ~/run_2026_03/fastq_pass >> samplesh
 
 Use absolute paths. Relative paths resolve against the directory you launch from.
 
-### Step 4 — run
+#### Step 4 — run
 
 ```bash
 nextflow run /path/to/nakast/nakast.nf \
@@ -142,9 +239,9 @@ nextflow run /path/to/nakast/nakast.nf \
 ```
 
 Expect roughly 5–10 minutes for three samples on a laptop, most of it in KMA. The first run
-adds a few minutes to build the Conda environments; later runs reuse them.
+adds a few minutes to build the Conda environments.
 
-### Step 5 — read the report
+#### Step 5 — read the report
 
 ```
 Sample  ST  CC     adhP  pheS  atr  glnA  sdhA  glcK  tkt  Profile
@@ -153,15 +250,15 @@ SGB12   24  cc452  5     4     4    3     2     3     3    OK
 SGB13   2   cc1    1     1     3    1     1     2     2    OK
 ```
 
-Three isolates typed: ST10, ST24 and ST2. Section 7 explains what to do when a row does not
+Three isolates typed: ST10, ST24 and ST2. Section 3.5 explains what to do when a row does not
 look like these.
 
-### Step 6 — check the QC
+#### Step 6 — check the QC
 
 Open `results_run2026_03/qc/multiqc_report.html` to confirm read counts and quality
 distributions are as expected for the run.
 
-## 4. Input specification
+### 3.2 Input specification
 
 A tab-separated file with a header row and three columns.
 
@@ -186,9 +283,9 @@ SGB11	/data/run1/barcode01	sagalactiae
 SAL07	/data/run1/barcode02	salmonella
 ```
 
-## 5. Parameter reference
+### 3.3 Parameter reference
 
-### Input and output
+#### Input and output
 
 | Parameter | Default | Description |
 |---|---|---|
@@ -199,7 +296,7 @@ SAL07	/data/run1/barcode02	salmonella
 | `--report_outdir` | `<outdir>/reports` | `.res` files and profile tables |
 | `--mlst_report` | `mlst_profiles` | Base name of the final report |
 
-### Read filtering
+#### Read filtering
 
 | Parameter | Default | Description |
 |---|---|---|
@@ -207,7 +304,7 @@ SAL07	/data/run1/barcode02	salmonella
 | `--min_length` | `300` | Minimum read length (filtlong) |
 | `--keep_percent` | `80` | Keep this percentage of the best reads by bases (filtlong) |
 
-### Allele calling
+#### Allele calling
 
 | Parameter | Default | Description |
 |---|---|---|
@@ -217,15 +314,16 @@ SAL07	/data/run1/barcode02	salmonella
 | `--kma_k` | `31` | K-mer size for the KMA index |
 | `--generate_consensus` | `true` | Publish per-locus consensus sequences |
 
-### Run modes
+#### Run modes
 
 | Parameter | Default | Description |
 |---|---|---|
 | `--qc_only` | `false` | Run QC only; no download, no typing |
 | `--list_species` | `false` | Print the supported-species catalogue and exit |
+| `--pubmlst_anonymous` | `false` | Query PubMLST without a key; data up to 31 Dec 2024 only (section 2.4) |
 | `--help` | `false` | Print usage and exit |
 
-### Nextflow options worth knowing
+#### Nextflow options worth knowing
 
 These belong to Nextflow itself and take a single dash.
 
@@ -235,7 +333,7 @@ These belong to Nextflow itself and take a single dash.
 | `-profile host` | Use the tools on your `PATH` instead of Conda |
 | `-with-report` | Extra HTML execution report |
 
-### Resources
+#### Resources
 
 Assigned by label in `nextflow.config`. Edit that file to fit your machine.
 
@@ -245,7 +343,7 @@ Assigned by label in `nextflow.config`. Edit that file to fit your machine.
 | `process_medium` | 6 | 10 GB | 8 h | concatenation, filtering, QC, report |
 | `process_high` | 12 | 16 GB | 24 h | KMA alignment |
 
-## 6. Output reference
+### 3.4 Output reference
 
 ```
 results/
@@ -262,7 +360,7 @@ results/
 └── pipeline_info/
 ```
 
-### Which file answers which question
+#### Which file answers which question
 
 | Question | File |
 |---|---|
@@ -273,7 +371,7 @@ results/
 | Which PubMLST version did this run use? | `reports/<species>_profiles.tsv` |
 | How long did it take, what failed? | `pipeline_info/` |
 
-### Final report columns
+#### Final report columns
 
 | Column | Content |
 |---|---|
@@ -283,7 +381,7 @@ results/
 | one column per locus | Allele call with its quality annotation |
 | `Profile` | `OK`, or `INCOMPLETE (n/N)` when fewer than N loci were recovered |
 
-### Intermediate files
+#### Intermediate files
 
 - `reports/<sample>.res` — raw KMA output. The authoritative record of identity, coverage,
   depth and score for every template considered.
@@ -292,11 +390,11 @@ results/
 - `consensus_sequences/<sample>.fsa` — KMA consensus per locus.
 - `pipeline_info/` — execution report, timeline and trace.
 
-## 7. Interpreting your results
+### 3.5 Interpreting your results
 
 Work through this in order when a row is not a clean `OK` with an ST.
 
-### The allele annotations
+#### The allele annotations
 
 | Notation | Meaning |
 |---|---|
@@ -306,11 +404,11 @@ Work through this in order when a row is not a clean `OK` with an ST.
 | `INS` | The read covers less than the full allele |
 | `-` | No call: below identity, coverage or depth thresholds |
 
-**Only bare integers can match a PubMLST profile.** This is the single most useful fact in
-this manual. If any locus carries `~`, `?`, `INS` or `-`, the profile cannot match and `ST`
-will be `-`. The ST lookup did not fail; the profile was simply incomplete.
+**Only bare integers can match a PubMLST profile.** If any locus carries `~`, `?`, `INS` or
+`-`, the profile cannot match and `ST` will be `-`. The ST lookup did not fail; the profile
+was simply incomplete.
 
-### Decision guide
+#### Decision guide
 
 **`ST = -` but every locus has a bare integer.** The profile is complete but that combination
 is not in PubMLST. This is a genuinely new ST. Consider submitting it.
@@ -334,7 +432,7 @@ the 135 schemes define none at all. Check the `CC` column in the catalogue for y
 **Every sample has `ST = -`.** Suspect the `species` value before suspecting the data. Typing
 against the wrong scheme produces empty results without any error.
 
-### Reading the evidence file
+#### Reading the evidence file
 
 ```bash
 column -t results/reports/SGB20.res | head
@@ -345,7 +443,7 @@ The columns that matter are `#Template` (locus and allele), `Template_Identity`,
 `Template_Identity` below 100. A locus reported as `-` may be absent from the file entirely,
 which means nothing passed the thresholds.
 
-## 8. Assessing data quality
+### 3.6 Assessing data quality
 
 NAKAST does not enforce a quality gate beyond `--min_depth`. Use these reference points from
 validation on the in-house *S. agalactiae* amplicon panel.
@@ -363,7 +461,12 @@ worst amplicon is normal. What matters is that the weakest locus clears `--min_d
 Very high depth does not rescue a bad amplification. If one locus is consistently weak across
 every sample in a run, the cause is the primer or the reaction, not the analysis.
 
-## 9. Workflow architecture
+## 4. Technical module: administration and maintenance
+
+This section is for whoever administers, adapts or maintains the pipeline. It describes how
+it works internally, what it assumes about the data, and where its limits lie.
+
+### 4.1 Workflow architecture
 
 | Process | Tool | Purpose |
 |---|---|---|
@@ -386,13 +489,13 @@ every sample in a run, the cause is the primer or the reaction, not the analysis
 | `KMA_RUN`, `GENERATE_REPORT` | `terminate` | A silent failure here would produce a run with no results and exit 0 |
 | `concat_ONT_fastq`, `FILTER_ONT`, `NANOPLOT`, `MULTIQC` | `ignore` | One bad sample should not abort the batch |
 
-## 10. How allele calling works
+### 4.2 How allele calling works
 
-### Step 1 — depth filter
+#### Step 1 — depth filter
 
 Templates below `--min_depth` are discarded, both by KMA and again in the report script.
 
-### Step 2 — pick a winner per locus
+#### Step 2 — pick a winner per locus
 
 Several alleles of the same locus usually attract reads, since they differ by a few bases.
 NAKAST ranks them with a confidence score:
@@ -408,7 +511,7 @@ Confidence  = Score_Ratio × log1p(Depth) × perfect_bonus
 The bonus is multiplicative rather than absolute on purpose: a perfect match still needs
 depth behind it, so a single well-aligned read cannot outrank a deeply covered allele.
 
-### Step 3 — annotate the call
+#### Step 3 — annotate the call
 
 | Notation | Condition |
 |---|---|
@@ -422,7 +525,7 @@ A note on `?`: query coverage above 100% means the read is *longer* than the tem
 an amplicon panel this reflects read-through rather than truncation, so the call is usually
 sound. Treat `9?` as "probably allele 9, worth confirming" rather than as a failure.
 
-## 11. ST and CC assignment
+### 4.3 ST and CC assignment
 
 The allele calls are joined into a signature (`9/1/4/1/3/3/2`) and matched against the same
 signature built from the PubMLST profile table. The match is exact and string-based:
@@ -435,7 +538,7 @@ signature built from the PubMLST profile table. The match is exact and string-ba
   `clonalcomplex`). When absent, `CC = -`.
 - No match returns `ST = -`. **NAKAST never reports a nearest or approximate ST.**
 
-## 12. Species support
+### 4.4 Species support
 
 `assets/pubmlst_species.tsv` and `docs/supported_species.md` catalogue the **135 PubMLST
 schemes** that define ST profiles. Regenerate them with:
@@ -455,7 +558,7 @@ resolves at run time:
 Locus names are also less regular than they look: `MLST_adk`, `16S_rRNA` and `int_hyp` all
 contain underscores, so allele identifiers are split from the right.
 
-## 13. Assumptions
+### 4.5 Assumptions
 
 These matter for interpreting results.
 
@@ -468,7 +571,8 @@ These matter for interpreting results.
    error.
 3. **PubMLST is reachable and authoritative.** The database is downloaded fresh on every run,
    so results depend on the state of PubMLST at run time. That is why the profile table is
-   published with the outputs.
+   published with the outputs. The complete scheme is only obtained with a valid access key
+   (section 2.4).
 4. **The scheme defines ST profiles.** Schemes without a primary key, such as cgMLST, are
    excluded from the catalogue and rejected at download time.
 5. **Sample identifiers are unique** across the samplesheet. They name the output files.
@@ -478,7 +582,7 @@ These matter for interpreting results.
    some loci; the confidence score will pick one, and a `~` annotation is often the only
    visible hint.
 
-## 14. Limitations
+### 4.6 Limitations
 
 1. **Oxford Nanopore only.** There is no short-read path. Filtering and alignment parameters
    are tuned for the ONT error profile, and the samplesheet takes a directory of FASTQ files
@@ -489,52 +593,28 @@ These matter for interpreting results.
    consensus in `consensus_sequences/` is the starting point.
 3. **Network required.** There is no offline mode and no local cache between runs. Every run
    re-downloads the scheme.
-4. **Biologically validated on one species.** The architecture is species-agnostic and was
+4. **Incomplete data without a key.** With `--pubmlst_anonymous` only data deposited up to
+   31 December 2024 is used. For *S. agalactiae*, in September 2026, that left out 301 of
+   2673 STs (11%).
+5. **Terms of use for recent data.** PubMLST data deposited since 2025, obtained with the key,
+   may only be used for non-commercial academic research or public health surveillance and
+   may not be redistributed. Commercial use requires a licence from the University of Oxford.
+   Data deposited before 2025 carries no such restriction.
+6. **Biologically validated on one species.** The architecture is species-agnostic and was
    exercised against the *Salmonella*, *Brucella*, *Vibrio* and *Mycoplasma genitalium*
    schemes, but validation against known isolates was done only for *S. agalactiae* with the
    in-house amplicon panel. Alignment parameters are tuned for that panel.
-5. **Clonal complexes depend on the scheme.** 33 of 135 schemes define none, and even where
+7. **Clonal complexes depend on the scheme.** 33 of 135 schemes define none, and even where
    defined many STs have no CC.
-6. **No contamination or mixed-sample detection.** There is no explicit check for multiple
+8. **No contamination or mixed-sample detection.** There is no explicit check for multiple
    alleles at a locus.
-7. **Depth thresholds are global.** `--min_depth` applies to every locus equally. A panel
+9. **Depth thresholds are global.** `--min_depth` applies to every locus equally. A panel
    where one amplicon systematically underperforms may need the threshold lowered for the
    whole run.
-8. **One report per species.** Batches spanning several species produce several files rather
+10. **One report per species.** Batches spanning several species produce several files rather
    than one merged table, because the locus columns differ.
 
-## 15. Troubleshooting
-
-**`Unknown configuration profile: 'conda'`** — Conda is enabled by default; drop the
-`-profile conda` flag.
-
-**`command not found` / exit status 127** — the process ran against the host `PATH` instead
-of its Conda environment. Confirm `nextflow config .` reports `conda { enabled = true }`, and
-that no stray `nextflow.config` in your launch directory is overriding it.
-
-**`Variable declarations cannot be mixed with config statements`** — a `nextflow.config` in
-your launch directory uses syntax that Nextflow 26 rejects. Nextflow merges the config from
-the launch directory with the pipeline's own, so an unrelated config from an old project will
-break the run. Launch from a clean directory.
-
-**Every ST is `-`** — check the `species` value first, then the allele columns. See
-[section 7](#7-interpreting-your-results).
-
-**Species rejected by validation** — run `--list_species` and use the exact short name. The
-error message suggests near matches.
-
-**Download fails** — the pipeline retries three times before stopping, and lets in-flight QC
-finish. Re-run with `-resume` when connectivity returns; completed work is reused.
-
-**Nothing is cached on `-resume`** — check that nothing in the task inputs changes between
-runs. Interpolating a `Path` object such as `launchDir` directly into a process script gives
-it an unstable hash; pass it as a `val` input instead.
-
-**A sample is missing from the report** — its filtering or QC step failed and was ignored so
-the batch could continue. Look for `Error is ignored` in the Nextflow log and check
-`pipeline_info/` for which process failed.
-
-## 16. Reproducibility
+### 4.7 Reproducibility
 
 Every process declares its own Conda environment with exact versions:
 
@@ -556,11 +636,10 @@ The one input that is *not* pinned is PubMLST itself, which changes as curators 
 and STs. To make a past run reproducible, keep `reports/<species>_profiles.tsv` and the
 `pipeline_info/` trace alongside the report.
 
-## 17. Design notes
+### 4.8 Design notes
 
 Two findings from tuning against real *S. agalactiae* data are recorded here because they are
-counter-intuitive and easy to reintroduce. This section is aimed at maintainers rather than
-users.
+counter-intuitive and easy to reintroduce.
 
 **KMA's `-mrc` is not allele coverage.** `-mrc` is *minimum query coverage*: the fraction of
 the **read** that must align. An earlier version passed `--allele_coverage` to it. With reads
@@ -581,24 +660,189 @@ typical ONT amplicon data. With a median per-read quality near Q18, thresholds a
 Q22 retain a fraction of a percent of bases, and the surviving fragments are shorter than a
 single amplicon, so they cannot cover an allele.
 
-## 18. Support, citation and licence
+## 5. Support, citation and licence
 
-**Reporting problems.** Open an issue at
-<https://github.com/javiertognarelli/nakast/issues>. Include the Nextflow version
-(`nextflow -version`), the command you ran, and the relevant part of `.nextflow.log`.
+### 5.1 Reporting problems
 
-**Authorship.**
+Open an issue at <https://github.com/javiertognarelli/nakast/issues>. Include the Nextflow
+version (`nextflow -version`), the command you ran, and the relevant part of
+`.nextflow.log`.
 
-NAKAST — Javier Tognarelli Santiago, Genómica UV, Escuela de Medicina,
-Universidad de Valparaíso, Chile\
-Daniel Escobar Araya, Unidad de Investigación e Innovación, Instituto de Salud Pública, Chile\
-Fernando Amaya Inzunza, Unidad de Investigación e Innovación, Instituto de Salud Pública,
-Chile
+### 5.2 Authorship
 
-**Citing NAKAST.** Cite this pipeline together with PubMLST and the underlying tools. The
-complete list of third-party components and their licences is in
+Javier Alejandro Tognarelli Santiago — Genómica UV, Escuela de Medicina, Universidad de
+Valparaíso, Chile\
+Daniel Fernando Escobar Araya — Unidad de Investigación e Innovación, Instituto de Salud
+Pública, Chile\
+Fernando Andrés Amaya Inzunza — Unidad de Investigación e Innovación, Instituto de Salud
+Pública, Chile
+
+### 5.3 How to cite NAKAST
+
+Copy the form that matches the style of your document.
+
+**Vancouver style**
+
+> Tognarelli Santiago JA, Escobar Araya DF, Amaya Inzunza FA. NAKAST: MLST typing from
+> Oxford Nanopore amplicon sequencing [software]. Version 1.0. Valparaíso: Universidad de
+> Valparaíso; 2026. Available from: https://github.com/javiertognarelli/nakast
+
+**APA style (7th edition)**
+
+> Tognarelli Santiago, J. A., Escobar Araya, D. F., & Amaya Inzunza, F. A. (2026). *NAKAST:
+> MLST typing from Oxford Nanopore amplicon sequencing* (Version 1.0) [Computer software].
+> Universidad de Valparaíso. https://github.com/javiertognarelli/nakast
+
+**BibTeX**, for reference managers and LaTeX:
+
+```bibtex
+@software{nakast2026,
+  author    = {Tognarelli Santiago, Javier Alejandro and
+               Escobar Araya, Daniel Fernando and
+               Amaya Inzunza, Fernando Andrés},
+  title     = {{NAKAST}: {MLST} typing from {Oxford Nanopore} amplicon sequencing},
+  version   = {1.0},
+  year      = {2026},
+  publisher = {Universidad de Valparaíso},
+  url       = {https://github.com/javiertognarelli/nakast}
+}
+```
+
+### 5.4 References for the components
+
+A publication using NAKAST results should also cite the data source and the tools it relies
+on. Vancouver-style references, ready to copy:
+
+> 1. Jolley KA, Bray JE, Maiden MCJ. Open-access bacterial population genomics: BIGSdb
+>    software, the PubMLST.org website and their applications. Wellcome Open Res.
+>    2018;3:124. doi:10.12688/wellcomeopenres.14826.1
+> 2. Clausen PTLC, Aarestrup FM, Lund O. Rapid and precise alignment of raw reads against
+>    redundant databases with KMA. BMC Bioinformatics. 2018;19(1):307.
+>    doi:10.1186/s12859-018-2336-6
+> 3. Di Tommaso P, Chatzou M, Floden EW, Barja PP, Palumbo E, Notredame C. Nextflow enables
+>    reproducible computational workflows. Nat Biotechnol. 2017;35(4):316-319.
+>    doi:10.1038/nbt.3820
+> 4. De Coster W, Rademakers R. NanoPack2: population-scale evaluation of long-read
+>    sequencing data. Bioinformatics. 2023;39(5):btad311. doi:10.1093/bioinformatics/btad311
+> 5. Ewels P, Magnusson M, Lundin S, Käller M. MultiQC: summarize analysis results for
+>    multiple tools and samples in a single report. Bioinformatics. 2016;32(19):3047-3048.
+>    doi:10.1093/bioinformatics/btw354
+> 6. Wick R. Filtlong [software]. Available from: https://github.com/rrwick/Filtlong
+
+Reference 1 is PubMLST, 2 is KMA, 3 is Nextflow, 4 covers NanoPlot and chopper, and 5 is
+MultiQC. Filtlong has no associated publication and is cited by its repository.
+
+### 5.5 Third-party components and data source
+
+The complete list of third-party components, with their versions and licences, is in
 [`THIRD_PARTY_LICENSES.md`](THIRD_PARTY_LICENSES.md).
 
-**Data source.** Allele and profile definitions come from PubMLST (<https://pubmlst.org>),
-hosted at the University of Oxford. Acknowledge PubMLST and the relevant scheme in any
-publication using these results.
+Allele and profile definitions come from PubMLST (<https://pubmlst.org>), hosted at the
+University of Oxford. Its terms of use require the following acknowledgement, verbatim, in
+any publication based on its data, in addition to citing reference 1 of section 5.4:
+
+> This publication made use of the PubMLST website (https://pubmlst.org/) sited at the
+> University of Oxford. The development of that website was funded by the Wellcome Trust.
+
+## 6. Frequently asked questions
+
+#### Do I need to install KMA, NanoPlot or other tools separately?
+
+No. Each process declares its own Conda environment and Nextflow builds it automatically on
+the first run. You only need Nextflow and Conda (section 2.1).
+
+#### Do I need a PubMLST account?
+
+Yes, to obtain the complete scheme. The account is free; it is where you create the access
+key NAKAST uses (section 2.4). Without one you can run with `--pubmlst_anonymous`, but only
+with data deposited up to 31 December 2024.
+
+#### Can I analyse several species in one run?
+
+Yes. Declare each sample's species in the `species` column. NAKAST downloads one database per
+species and produces one report for each.
+
+#### How do I know which name to use in the `species` column?
+
+Run `nextflow run nakast.nf --list_species` and use the exact short name in the first column.
+The full catalogue is also in `docs/supported_species.md`.
+
+#### Why does my sample show `ST = -`?
+
+Almost always because one locus is annotated (`~N`, `N?`, `INS` or `-`), so the profile
+cannot match any in PubMLST. [Section 3.5](#35-interpreting-your-results) explains what to do
+in each case.
+
+#### What does it mean when an allele shows as `~9`?
+
+That the closest allele is 9 but the sequence does not match it exactly. It may be a novel
+allele or a sequencing error; if the difference is consistent at high depth, confirm it by
+Sanger.
+
+#### Every sample shows `ST = -`. What should I check first?
+
+The `species` value. Typing against the wrong scheme produces empty results without any
+error. Then check the allele columns.
+
+#### Can I use Illumina data?
+
+No. NAKAST processes Oxford Nanopore reads only and its parameters are tuned for that error
+profile.
+
+#### Does it work offline?
+
+No. Every run downloads the current scheme from PubMLST.
+
+#### The PubMLST download failed. Do I lose my progress?
+
+No. The pipeline retries three times, lets in-flight quality control finish, and stops. Once
+connectivity is back, re-run the same command with `-resume`; completed work is reused.
+
+#### `-resume` reuses nothing. Why?
+
+Something in the task inputs changed between runs. If you modified the code, note that
+interpolating a `Path` object such as `launchDir` directly into a process script gives it an
+unstable hash; it must be passed as a `val` input.
+
+#### A sample is missing from the report.
+
+Its filtering or QC step failed and was ignored so the rest of the batch could continue. Look
+for `Error is ignored` in the Nextflow log and check `pipeline_info/` for which process
+failed.
+
+#### Validation rejects the species.
+
+The name is not in the catalogue. Run `--list_species` and use the exact short name; the error
+message suggests near matches.
+
+#### I get `No PubMLST API key found`.
+
+No key is stored in the Nextflow secrets store. Store one as described in section 2.4, or add
+`--pubmlst_anonymous` to run with data up to 2024 only.
+
+#### I get `PubMLST rejected the API key (HTTP 401)`.
+
+The stored key is invalid or was revoked. Create a new one in your PubMLST account and store
+it again with the command in section 2.4; the old value is replaced.
+
+#### I get `Unknown configuration profile: 'conda'`.
+
+Conda is enabled by default. Drop the `-profile conda` flag from the command.
+
+#### I get `command not found` or `exit status 127`.
+
+The process ran against the host `PATH` instead of its Conda environment. Confirm that
+`nextflow config .` reports `conda { enabled = true }`, and that no stray `nextflow.config`
+in your launch directory is overriding it.
+
+#### I get `Variable declarations cannot be mixed with config statements`.
+
+A `nextflow.config` in your launch directory uses syntax that Nextflow 26 rejects. Nextflow
+merges that file with the pipeline's own, so an unrelated config from another project breaks
+the run. Launch from a clean directory.
+
+#### How do I reproduce an old run exactly?
+
+Keep `reports/<species>_profiles.tsv` and the `pipeline_info/` trace alongside the report.
+The tools are pinned; the only thing that changes over time is PubMLST, and that file records
+the version used.

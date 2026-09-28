@@ -1,6 +1,8 @@
 #!/usr/bin/env nextflow
 
-// NAKAST - MLST typing from Oxford Nanopore amplicon sequencing.
+// NAKAST - Nanopore Amplicon KMA Allele Sequence Typing.
+//
+// MLST typing from Oxford Nanopore amplicon sequencing.
 //
 // Designed and validated with Streptococcus agalactiae. The species is a
 // per-sample parameter, so the pipeline works with any MLST scheme published

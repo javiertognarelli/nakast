@@ -23,7 +23,7 @@ El presente documento tiene como propósito declarar de forma transparente todos
 externos, bibliotecas de código abierto y licencias de software utilizados en la plataforma
 NAKAST.
 
-NAKAST es un pipeline de línea de comandos, desarrollado en Nextflow, que determina perfiles
+NAKAST (*Nanopore Amplicon KMA Allele Sequence Typing*) es un pipeline de línea de comandos, desarrollado en Nextflow, que determina perfiles
 MLST a partir de lecturas de secuenciación Oxford Nanopore. Se ejecuta en el equipo del
 usuario y no cuenta con componentes de servidor, interfaz web ni base de datos propia.
 

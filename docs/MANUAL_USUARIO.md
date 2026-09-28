@@ -56,7 +56,8 @@ FERNANDO ANDRÉS AMAYA INZUNZA</p>
 
 ## 1. Introducción
 
-NAKAST es un pipeline desarrollado en Nextflow que determina el perfil MLST de aislados
+NAKAST (*Nanopore Amplicon KMA Allele Sequence Typing*) es un pipeline desarrollado en
+Nextflow que determina el perfil MLST de aislados
 bacterianos a partir de lecturas de secuenciación de amplicones Oxford Nanopore (ONT). A
 partir de los archivos FASTQ de cada muestra y del nombre de su especie, entrega una tabla
 con el Sequence Type (ST) y, cuando el esquema lo define, el Complejo Clonal (CC) de cada

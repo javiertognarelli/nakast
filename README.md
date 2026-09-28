@@ -1,7 +1,11 @@
 # NAKAST
 
+**N**anopore **A**mplicon **K**MA **A**llele **S**equence **T**yping
+
 A Nextflow pipeline for automated Multi Locus Sequence Typing (MLST) from Oxford Nanopore
-(ONT) amplicon sequencing.
+(ONT) amplicon sequencing. The name spells out how it works: Nanopore reads from amplicons of
+the MLST loci are aligned with KMA, each locus is assigned an allele, and the resulting
+allelic profile gives the Sequence Type.
 
 NAKAST takes raw FASTQ reads and produces a final MLST report: read quality control,
 quality filtering, automatic download of the relevant PubMLST scheme, database indexing,

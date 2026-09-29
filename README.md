@@ -25,6 +25,38 @@ Third-party components and their licences are inventoried in
 
 ---
 
+## Why Nanopore reads can support MLST
+
+MLST alleles often differ by a single base, so typing depends on reading every base
+correctly. The historically high error rate of Nanopore data long ruled this out; R10.4.1
+flow cells with super-accurate (SUP) basecalling now reach about Q20, or 99% per-base
+accuracy, which is enough for high-resolution typing [1]. NAKAST builds on this in three
+ways:
+
+- **Only high-quality bases.** Reads are split at low-quality stretches and only segments at
+  Q20 or above are kept, about one base in eight in our data.
+- **Consensus from depth.** Amplicon sequencing yields hundreds to thousands of reads per
+  locus, and each read spans a whole amplicon, so KMA calls every allele from agreement
+  across many reads rather than from any single one.
+- **Amplified DNA.** PCR removes the base modifications behind part of the Nanopore errors
+  seen in bacterial typing [2].
+
+The defaults were chosen after comparing eight configurations of read quality, minimum
+depth, KMA k-mer size and read retention on 30 *S. agalactiae* isolates, sequenced on
+R10.4.1 and basecalled with `dna_r10.4.1_e8.2_400bps_sup@v5.2.0`, and after further refining
+the alignment and filtering steps. The final version typed all 30 isolates, with 210 of 210
+alleles matching exactly. A manuscript describing NAKAST and this validation is in
+preparation.
+
+1. Zidane N, Rodrigues C, Bouchez V, Rethoret-Pasty M, Passet V, Brisse S, Crestani C.
+   Accurate genotyping of three major respiratory bacterial pathogens with ONT R10.4.1
+   long-read sequencing. Genome Res. 2025;35(8):1758-1766.
+   doi:[10.1101/gr.279829.124](https://doi.org/10.1101/gr.279829.124)
+2. Dabernig-Heinz J, Lohde M, Hölzer M, et al. A multicenter study on accuracy and
+   reproducibility of nanopore sequencing-based genotyping of bacterial pathogens.
+   J Clin Microbiol. 2024;62(9):e0062824.
+   doi:[10.1128/jcm.00628-24](https://doi.org/10.1128/jcm.00628-24)
+
 ## Requirements
 
 | Component | Version | Notes |
@@ -196,6 +228,10 @@ Universidad de Valparaíso, Chile\
 Daniel Escobar Araya, Unidad de Investigación e Innovación, Instituto de Salud Pública, Chile\
 Fernando Amaya Inzunza, Unidad de Investigación e Innovación, Instituto de Salud Pública,
 Chile
+
+A manuscript describing NAKAST is in preparation. Until it is published, please cite this
+repository; ready-to-paste citations in Vancouver, APA and BibTeX are in section 5.3 of the
+[User Manual](docs/USER_MANUAL.md).
 
 Allele and profile definitions come from PubMLST (<https://pubmlst.org>). If you publish
 results produced with this pipeline, cite PubMLST and the relevant scheme alongside the
